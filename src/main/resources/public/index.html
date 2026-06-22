@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORMAK BÜRO MAKİNELERİ | Stok ve Sayaç Portalı</title>
+    <!-- Google Font: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- LOGIN SCREEN OVERLAY                       -->
+    <!-- ========================================== -->
+    <div id="login-container" class="overlay-container active">
+        <div class="login-card glass">
+            <div class="login-header">
+                <h1>BORMAK</h1>
+                <p class="subtitle">BÜRO MAKİNELERİ</p>
+                <p class="badge">STOK VE SAYAÇ PORTALI</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Kullanıcı Adı</label>
+                    <input type="text" id="login-username" value="admin" required placeholder="Kullanıcı adınızı girin">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Şifre</label>
+                    <input type="password" id="login-password" value="admin123" required placeholder="Şifrenizi girin">
+                </div>
+                
+                <div id="login-error" class="error-banner hidden"></div>
+                
+                <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block">Giriş Yap</button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Yazılım: Akif Aslan</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN APPLICATION FRAME                     -->
+    <!-- ========================================== -->
+    <div id="app-container" class="app-layout hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass">
+            <div class="sidebar-brand">
+                <h2>BORMAK</h2>
+                <span>PORTAL</span>
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar">U</div>
+                <div class="user-info">
+                    <h3 id="current-user-name">Kullanıcı Adı</h3>
+                    <span id="current-user-role" class="role-badge">ADMIN</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-tab="tab-overview" id="nav-overview">
+                        <span class="icon">📊</span> Genel Bakış
+                    </li>
+                    <li class="nav-item" data-tab="tab-warehouse" id="nav-warehouse">
+                        <span class="icon">🏢</span> Depo & Katalog
+                    </li>
+                    <li class="nav-item" data-tab="tab-handovers" id="nav-handovers">
+                        <span class="icon">🔑</span> Personel Zimmetleri
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-employees" id="nav-employees">
+                        <span class="icon">👥</span> Personel Yönetimi
+                    </li>
+                    <li class="nav-item" data-tab="tab-customers" id="nav-customers">
+                        <span class="icon">💼</span> Müşteri Listesi
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-machines" id="nav-machines">
+                        <span class="icon">📠</span> Makine Bilgileri
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-contracts" id="nav-contracts">
+                        <span class="icon">📝</span> Sözleşme & Operasyon
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-toner-analysis" id="nav-toner-analysis">
+                        <span class="icon">🧪</span> Toner Analiz Modülü
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-stock-history" id="nav-stock-history">
+                        <span class="icon">📜</span> Stok Hareket Geçmişi
+                    </li>
+                    <li class="nav-item admin-only" data-tab="tab-yearly-report" id="nav-yearly-report">
+                        <span class="icon">📅</span> Yıllık Rapor
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="btn-logout" class="btn btn-danger btn-block">Çıkış Yap</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header glass">
+                <div class="header-title">
+                    <h1 id="header-page-title">Genel Bakış</h1>
+                </div>
+                <div class="header-status">
+                    <span id="tcmb-rates-display" class="currency-rates">Kurlar yükleniyor...</span>
+                    <span class="status-indicator online">Aktif Sunucu</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Alert Banner for Critical Outdated Readings -->
+                <div id="alert-banner" class="alert-banner hidden">
+                    <span class="alert-icon">⚠️</span>
+                    <span id="alert-banner-text" class="alert-text">Kritik Uyarı: Sayaç okuması 30 günü geçmiş veya hiç girilmemiş müşteriler bulunmaktadır!</span>
+                </div>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: OVERVIEW                            -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-overview" class="tab-pane active">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <div class="stat-icon purple">📦</div>
+                            <div class="stat-info">
+                                <h3>Toplam Depo Stoğu</h3>
+                                <p id="stat-warehouse-stock">0 Adet</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-icon green">👥</div>
+                            <div class="stat-info">
+                                <h3>Toplam Personel</h3>
+                                <p id="stat-total-employees">0 Kişi</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <div class="stat-icon blue">💼</div>
+                            <div class="stat-info">
+                                <h3>Toplam Müşteri</h3>
+                                <p id="stat-total-customers">0 Firma</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass" id="stat-critical-card">
+                            <div class="stat-icon red">⚠️</div>
+                            <div class="stat-info">
+                                <h3>Kritik Sayaç Durumu</h3>
+                                <p id="stat-critical-meters">0 Cihaz</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-banner glass">
+                        <div class="banner-content">
+                            <h2>Bormak Büro Makineleri</h2>
+                            <p>Sorumluluk ve Stok Takip Sistemine Hoş Geldiniz. Sol menüden hızlıca ürün kataloglarını, personel zimmetlerini, müşteri profillerini ve sözleşme detaylarını yönetebilirsiniz.</p>
+                            <button id="btn-open-pdf-wizard-overview" class="btn btn-primary" style="margin-top: 15px; background: linear-gradient(135deg, #7c3aed, #2563eb); border: none;">
+                                📄 Rapor Sihirbazı (PDF) Aç
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: WAREHOUSE & PRODUCTS                -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-warehouse" class="tab-pane">
+                    <div class="grid-2-1">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h2>Ürün Kataloğu</h2>
+                                <div class="action-bar">
+                                    <input type="text" id="search-products" placeholder="Ürün Ara...">
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table id="table-products">
+                                    <thead>
+                                        <tr>
+                                            <th>Stok Kodu</th>
+                                            <th>Ürün Adı</th>
+                                            <th>Tedarikçi</th>
+                                            <th>Miktar (Depo)</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-products">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Yeni Ürün Tanımla</h2>
+                                </div>
+                                <form id="form-add-product">
+                                    <div class="form-group">
+                                        <label for="prod-code">Stok Kodu</label>
+                                        <input type="text" id="prod-code" required placeholder="Örn: KYO-TK-3130">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-name">Ürün Adı</label>
+                                        <input type="text" id="prod-name" required placeholder="Örn: Kyocera TK-3130 Toner">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-supplier">Tedarikçi</label>
+                                        <input type="text" id="prod-supplier" placeholder="Örn: Bormak Depo">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-qty">Başlangıç Miktarı</label>
+                                        <input type="number" id="prod-qty" min="0" value="0">
+                                    </div>
+                                    <button type="submit" id="btn-save-product" class="btn btn-primary btn-block">Ürün Kaydet</button>
+                                </form>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Depoya Ürün Girişi</h2>
+                                </div>
+                                <form id="form-warehouse-entry">
+                                    <div class="form-group">
+                                        <label for="select-entry-product">Ürün Seçin</label>
+                                        <select id="select-entry-product" required>
+                                            <!-- Dynamic items -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="entry-qty">Eklenecek Miktar</label>
+                                        <input type="number" id="entry-qty" min="1" value="1" required>
+                                    </div>
+                                    <button type="submit" id="btn-warehouse-entry-submit" class="btn btn-success btn-block">Depo Girişi Yap</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: EMPLOYEE HANDOVERS (ZİMMET)         -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-handovers" class="tab-pane">
+                    <div class="grid-2-1">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h2>Personel Zimmet Kartları</h2>
+                                <div class="action-bar">
+                                    <input type="text" id="search-handover-employees" placeholder="Personel Ara...">
+                                </div>
+                            </div>
+                            <div id="handover-cards-grid" class="cards-grid">
+                                <!-- Dynamic employee cards -->
+                            </div>
+                        </div>
+                        
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Zimmete Ürün Aktar</h2>
+                                </div>
+                                <form id="form-handover-transfer">
+                                    <div class="form-group">
+                                        <label for="select-handover-product">Ürün Seçin</label>
+                                        <select id="select-handover-product" required>
+                                            <!-- Dynamic items -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="select-handover-employee">Personel Seçin</label>
+                                        <select id="select-handover-employee" required>
+                                            <!-- Dynamic items -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="handover-qty">Miktar</label>
+                                        <input type="number" id="handover-qty" min="1" value="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="handover-desc">Açıklama (Opsiyonel)</label>
+                                        <input type="text" id="handover-desc" placeholder="Örn: Servis çantası teslimatı">
+                                    </div>
+                                    <button type="submit" id="btn-handover-transfer-submit" class="btn btn-primary btn-block">Zimmete Aktar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: EMPLOYEE REGISTRY (ADMIN ONLY)      -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-employees" class="tab-pane">
+                    <div class="grid-2-1">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h2>Personel Listesi</h2>
+                            </div>
+                            <div class="table-container">
+                                <table id="table-employees">
+                                    <thead>
+                                        <tr>
+                                            <th>Personel Kodu</th>
+                                            <th>Adı</th>
+                                            <th>Soyadı</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-employees">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Yeni Personel Ekle</h2>
+                                </div>
+                                <form id="form-add-employee">
+                                    <div class="form-group">
+                                        <label for="emp-code">Personel Kodu</label>
+                                        <input type="text" id="emp-code" required placeholder="Örn: PER-01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emp-firstname">Adı</label>
+                                        <input type="text" id="emp-firstname" required placeholder="Örn: Ahmet">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="emp-lastname">Soyadı</label>
+                                        <input type="text" id="emp-lastname" required placeholder="Örn: Yılmaz">
+                                    </div>
+                                    <button type="submit" id="btn-save-employee" class="btn btn-primary btn-block">Personel Ekle</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: CUSTOMERS                           -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-customers" class="tab-pane">
+                    <div class="grid-2-1">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h2>Müşteri Listesi</h2>
+                                <div class="action-bar flex-wrap">
+                                    <input type="text" id="search-customers" placeholder="Müşteri/Firma Ara...">
+                                    <select id="filter-customer-responsible">
+                                        <option value="">Tüm Personeller</option>
+                                    </select>
+                                    <select id="filter-customer-business">
+                                        <option value="">Tüm Çalışma Sistemleri</option>
+                                        <option value="KOPYA_BASI">Kopya Başı Sayaç Sistemi</option>
+                                        <option value="MALZEME_KARSILIGI">Malzeme Karşılığı Sistemi</option>
+                                        <option value="NORMAL">Normal Sistem</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table id="table-customers">
+                                    <thead>
+                                        <tr>
+                                            <th>Müşteri Kodu</th>
+                                            <th>Firma / Müşteri Adı</th>
+                                            <th>Çalışma Sistemi</th>
+                                            <th>Sorumlu Personel</th>
+                                            <th>Sayaç Durumu</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-customers">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Yeni Müşteri Tanımla</h2>
+                                </div>
+                                <form id="form-add-customer">
+                                    <div class="form-group">
+                                        <label for="cust-code">Müşteri Kodu</label>
+                                        <input type="text" id="cust-code" required placeholder="Örn: MUS-100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cust-name">Firma / Müşteri Adı</label>
+                                        <input type="text" id="cust-name" required placeholder="Örn: Bormak Bilişim Ltd.">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cust-responsible">Sorumlu Personel</label>
+                                        <select id="cust-responsible">
+                                            <option value="">Seçiniz (Opsiyonel)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cust-business">Çalışma Sistemi</label>
+                                        <select id="cust-business" required>
+                                            <option value="KOPYA_BASI">Kopya Başı Sayaç Sistemi</option>
+                                            <option value="MALZEME_KARSILIGI">Malzeme Karşılığı Sistemi</option>
+                                            <option value="NORMAL">Normal Sistem</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cust-price">Birim Sayfa Ücreti (Kopya Başı)</label>
+                                        <input type="number" id="cust-price" min="0" step="0.0001" value="0.1500" required>
+                                    </div>
+                                    <button type="submit" id="btn-save-customer" class="btn btn-success btn-block">Müşteri Kaydet</button>
+                                </form>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Müşteriye Ürün Teslim Et</h2>
+                                </div>
+                                <form id="form-customer-delivery">
+                                    <div class="form-group">
+                                        <label>Teslimat Kaynağı</label>
+                                        <div class="radio-group">
+                                            <label><input type="radio" name="delivery-source" value="warehouse" checked> Depodan Doğrudan</label>
+                                            <label><input type="radio" name="delivery-source" value="employee"> Zimmetten (Personelden)</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group hidden" id="group-delivery-employee">
+                                        <label for="select-delivery-emp">Sorumlu Çalışan</label>
+                                        <select id="select-delivery-emp">
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="select-delivery-product">Ürün</label>
+                                        <select id="select-delivery-product" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="select-delivery-cust">Alıcı Müşteri</label>
+                                        <select id="select-delivery-cust" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="delivery-qty">Miktar</label>
+                                        <input type="number" id="delivery-qty" min="1" value="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="delivery-desc">Açıklama (Opsiyonel)</label>
+                                        <input type="text" id="delivery-desc" placeholder="Örn: Müşteri talebiyle toner teslimi">
+                                    </div>
+                                    <button type="submit" id="btn-customer-delivery-submit" class="btn btn-primary btn-block">Teslimatı Tamamla</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: CUSTOMER MACHINES (ADMIN ONLY)      -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-machines" class="tab-pane">
+                    <div class="grid-2-1">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h2>Cihaz / Makine Listesi</h2>
+                                <div class="action-bar flex-wrap">
+                                    <input type="text" id="search-machines" placeholder="Makine/Seri No/Müşteri Ara...">
+                                    <select id="filter-machine-ownership">
+                                        <option value="">Tüm Mülkiyetler</option>
+                                        <option value="BİZİM_MAKİNEMİZ">Bizim Makinelerimiz (Piyasadakiler)</option>
+                                        <option value="MÜŞTERİNİN_MAKİNESİ">Müşteri Makineleri</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table id="table-machines">
+                                    <thead>
+                                        <tr>
+                                            <th>Müşteri / Firma</th>
+                                            <th>Makine Adı / Modeli</th>
+                                            <th>Seri Numarası</th>
+                                            <th>Kurulum Tarihi</th>
+                                            <th>Mülkiyet</th>
+                                            <th>İlk Sayaç</th>
+                                            <th>Güncel Sayaç</th>
+                                            <th>Toplam Kopya</th>
+                                            <th>Kazanç (Ciro)</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-machines">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Yeni Cihaz Kaydet</h2>
+                                </div>
+                                <form id="form-add-machine">
+                                    <div class="form-group">
+                                        <label for="mach-cust">Müşteri / Firma</label>
+                                        <select id="mach-cust" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-name">Cihaz Modeli / Adı</label>
+                                        <input type="text" id="mach-name" required placeholder="Örn: Kyocera M3645dn">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-serial">Seri Numarası</label>
+                                        <input type="text" id="mach-serial" required placeholder="Örn: V123456789">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-initial-meter">Başlangıç Sayacı (Meter)</label>
+                                        <input type="number" id="mach-initial-meter" min="0" value="0" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-initial-date">Sayaç Tarihi</label>
+                                        <input type="date" id="mach-initial-date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-install-date">Kurulum Tarihi</label>
+                                        <input type="date" id="mach-install-date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mach-ownership">Mülkiyet Tipi</label>
+                                        <select id="mach-ownership" required>
+                                            <option value="BİZİM_MAKİNEMİZ">Bizim Makinemiz</option>
+                                            <option value="MÜŞTERİNİN_MAKİNESİ">Müşterinin Makinesi</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" id="btn-save-machine" class="btn btn-primary btn-block">Cihaz Kaydet</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: CONTRACT & OPERATIONS (ADMIN ONLY)  -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-contracts" class="tab-pane">
+                    <div class="grid-2-1">
+                        <!-- Left: Device Registration & Reporting -->
+                        <div class="grid-vertical">
+                            <div class="stats-grid">
+                                <div class="stat-card glass compact-card">
+                                    <div class="stat-info-compact">
+                                        <h4>Kopya Başı Toplam Toner</h4>
+                                        <p id="report-kb-toner-cost" class="accent-cost">0.00 TL</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card glass compact-card">
+                                    <div class="stat-info-compact">
+                                        <h4>Malzeme Karşılığı Toner</h4>
+                                        <p id="report-mk-toner-cost" class="accent-cost">0.00 TL</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card glass compact-card">
+                                    <div class="stat-info-compact">
+                                        <h4>Malzeme Karşılığı Parça</h4>
+                                        <p id="report-mk-material-cost" class="accent-cost">0.00 TL</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card glass compact-card">
+                                    <div class="stat-info-compact">
+                                        <h4>Kopya Başı Parça</h4>
+                                        <p id="report-kb-material-cost" class="accent-cost">0.00 TL</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card glass compact-card">
+                                    <div class="stat-info-compact">
+                                        <h4>Normal Sistem Satış Geliri</h4>
+                                        <p id="report-sozlesmesiz-revenue" class="accent-revenue">0.00 TL</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Sözleşme İşlem Geçmişi</h2>
+                                </div>
+                                <div class="table-container-large">
+                                    <table id="table-operations-history">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Makine / Seri No</th>
+                                                <th>İşlem Türü</th>
+                                                <th>Açıklama</th>
+                                                <th>Fatura (Satış)</th>
+                                                <th>Maliyet (Şirket)</th>
+                                                <th>Baskı Kapasitesi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-operations-history">
+                                            <!-- Dynamic rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Action Form -->
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Sözleşmeli Cihaz Kaydı</h2>
+                                </div>
+                                <form id="form-contract-device">
+                                    <div class="form-group">
+                                        <label for="contract-serial">Seri Numarası</label>
+                                        <input type="text" id="contract-serial" required placeholder="Seri no girin">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contract-model">Marka / Model</label>
+                                        <input type="text" id="contract-model" required placeholder="Örn: Kyocera M3645dn">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contract-cust">Müşteri / Firma</label>
+                                        <select id="contract-cust" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contract-business">Çalışma Modeli</label>
+                                        <select id="contract-business" required>
+                                            <option value="KOPYA_BASI">Kopya Başı Sayaç Sistemi</option>
+                                            <option value="MALZEME_KARSILIGI">Malzeme Karşılığı Sistemi</option>
+                                            <option value="NORMAL">Normal Sistem</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contract-ownership">Cihaz Mülkiyeti</label>
+                                        <select id="contract-ownership" required>
+                                            <option value="BİZİM_MAKİNEMİZ">Bizim Makinemiz</option>
+                                            <option value="MÜŞTERİNİN_MAKİNESİ">Müşterinin Makinesi</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" id="btn-save-contract-device" class="btn btn-primary btn-block">Sözleşmeli Cihazı Kaydet</button>
+                                </form>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Sözleşmeli Operasyon Paneli</h2>
+                                </div>
+                                <form id="form-contract-op">
+                                    <div class="form-group">
+                                        <label for="select-op-device">İşlem Yapılacak Cihaz</label>
+                                        <select id="select-op-device" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Cihaz Bilgisi</label>
+                                        <div class="info-strip text-sm" id="op-device-info">
+                                            Firma: - | Sistem: - | Mülkiyet: -
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="select-op-type">Yapılacak İşlem</label>
+                                        <select id="select-op-type" required>
+                                            <option value="toner">Toner Dolumu / Değişimi</option>
+                                            <option value="sparepart">Yedek Parça Montajı</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Toner Dolumu inputs -->
+                                    <div id="op-toner-fields">
+                                        <div class="form-group">
+                                            <label for="select-op-toner">Toner Hammaddesi</label>
+                                            <select id="select-op-toner">
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="select-op-grams">Yüklenen Gramaj (gr)</label>
+                                            <select id="select-op-grams">
+                                                <option value="450">450 gr</option>
+                                                <option value="870">870 gr</option>
+                                                <option value="1000">1000 gr</option>
+                                                <option value="2000">2000 gr</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" id="op-sale-price-group">
+                                            <label for="op-sale-price">Satış Fiyatı (TL) [Normal Sistem ise]</label>
+                                            <input type="number" id="op-sale-price" min="0" value="0.00" step="0.01">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Yedek Parça inputs -->
+                                    <div id="op-sparepart-fields" class="hidden">
+                                        <div class="form-group">
+                                            <label for="select-op-source">Malzeme Kaynağı</label>
+                                            <select id="select-op-source">
+                                                <option value="warehouse">Ana Depodan Çıkış</option>
+                                                <option value="employee">Personel Zimmetinden Çıkış</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group hidden" id="op-emp-group">
+                                            <label for="select-op-emp">Zimmetli Personel</label>
+                                            <select id="select-op-emp">
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="select-op-prod">Çıkış Yapılacak Ürün</label>
+                                            <select id="select-op-prod">
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="op-prod-qty">Miktar</label>
+                                            <input type="number" id="op-prod-qty" min="1" value="1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="op-material-desc">Açıklama / Parça Adı</label>
+                                            <input type="text" id="op-material-desc" placeholder="Örn: Merdane Değişimi">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="op-material-cost">Birim Maliyet / Fiyat (TL)</label>
+                                            <input type="number" id="op-material-cost" min="0" value="0.00" step="0.01">
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" id="btn-complete-contract-op" class="btn btn-success btn-block">İşlemi Tamamla</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: TONER ANALYSIS (ADMIN ONLY)         -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-toner-analysis" class="tab-pane">
+                    <div class="grid-2-1">
+                        <!-- Left Forms -->
+                        <div class="side-forms">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Yeni Toner Türü Tanımla</h2>
+                                </div>
+                                <form id="form-add-toner-type">
+                                    <div class="form-group">
+                                        <label for="toner-name">Toner Adı</label>
+                                        <input type="text" id="toner-name" required placeholder="Örn: TK-3130 Premium">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="toner-cost-kg">1 KG Alış Fiyatı (TL)</label>
+                                        <input type="number" id="toner-cost-kg" min="0" step="0.01" required placeholder="Örn: 1500.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="toner-capacity">Standart Sayfa Kapasitesi (1 KG)</label>
+                                        <input type="number" id="toner-capacity" min="1000" step="1000" value="20000" required>
+                                    </div>
+                                    <button type="submit" id="btn-save-toner-type" class="btn btn-primary btn-block">Toner Türü Kaydet</button>
+                                </form>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Toner Dolum Hesaplayıcı</h2>
+                                </div>
+                                <form id="form-toner-fill-calc">
+                                    <div class="form-group">
+                                        <label for="select-calc-toner">Toner Seçimi</label>
+                                        <select id="select-calc-toner" required>
+                                            <option value="">Seçiniz...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group text-sm info-strip" id="calc-toner-info">
+                                        Gram Maliyeti: - | Gram Başı Sayfa: -
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="select-calc-preset">Gramaj Hazır Seçenekler</label>
+                                        <select id="select-calc-preset">
+                                            <option value="">-- Hazır Seçenekler --</option>
+                                            <option value="450">450 gr</option>
+                                            <option value="500">500 gr</option>
+                                            <option value="870">870 gr</option>
+                                            <option value="1000">1000 gr</option>
+                                            <option value="1500">1500 gr</option>
+                                            <option value="2000">2000 gr</option>
+                                            <option value="custom">Özel Gramaj</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="calc-custom-grams-group">
+                                        <label for="calc-custom-grams">Manuel Gramaj (gr)</label>
+                                        <input type="number" id="calc-custom-grams" min="0" placeholder="Gramaj girin">
+                                    </div>
+                                    
+                                    <div class="results-box grid-2">
+                                        <div class="result-tile bg-blue">
+                                            <span>Hesaplanan Maliyet</span>
+                                            <h3 id="calc-result-cost">0.00 TL</h3>
+                                        </div>
+                                        <div class="result-tile bg-green">
+                                            <span>Tahmini Baskı</span>
+                                            <h3 id="calc-result-pages">0 Sayfa</h3>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" id="btn-save-toner-fill" class="btn btn-success btn-block">Dolum Kaydı Kaydet</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Tables -->
+                        <div class="grid-vertical">
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Kayıtlı Toner Türleri</h2>
+                                </div>
+                                <div class="table-container" style="max-height: 180px;">
+                                    <table id="table-toner-types">
+                                        <thead>
+                                            <tr>
+                                                <th>Toner Adı</th>
+                                                <th>1 KG Fiyatı (TL)</th>
+                                                <th>Kapasite (1KG)</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-toner-types">
+                                            <!-- Dynamic rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="card glass">
+                                <div class="card-header">
+                                    <h2>Dolum Geçmişi</h2>
+                                </div>
+                                <div class="table-container">
+                                    <table id="table-toner-fillings">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Toner Türü</th>
+                                                <th>Miktar (gr)</th>
+                                                <th>Maliyet (TL)</th>
+                                                <th>Baskı Kapasitesi</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-toner-fillings">
+                                            <!-- Dynamic rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: STOCK HISTORY                       -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-stock-history" class="tab-pane">
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h2>Stok Giriş & Çıkış Hareketleri</h2>
+                            <div class="action-bar flex-wrap">
+                                <label>Tarih Aralığı:</label>
+                                <input type="date" id="filter-history-start">
+                                <input type="date" id="filter-history-end">
+                                <input type="text" id="search-history" placeholder="Ürün, Personel veya Müşteri Ara...">
+                                <button id="btn-history-export" class="btn btn-success">Excel/Excel CSV Aktar</button>
+                            </div>
+                        </div>
+                        <div class="table-container-large">
+                            <table id="table-stock-history">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>İşlem Türü</th>
+                                        <th>Stok Kodu</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Personel</th>
+                                        <th>Müşteri / Alıcı</th>
+                                        <th>Miktar</th>
+                                        <th>Açıklama</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-stock-history">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ---------------------------------------- -->
+                <!-- TAB: YEARLY REPORT                       -->
+                <!-- ---------------------------------------- -->
+                <section id="tab-yearly-report" class="tab-pane">
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h2>Yıllık Müşteri Sayaç ve Kopya Raporu</h2>
+                            <div class="action-bar">
+                                <label for="select-report-year">Yıl Seçin:</label>
+                                <select id="select-report-year">
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                </select>
+                                <button id="btn-yearly-export" class="btn btn-success">Raporu Excel CSV İndir</button>
+                                <button id="btn-open-pdf-wizard-yearly" class="btn btn-primary" style="background: var(--gradient-primary) !important; border: none;">📄 Rapor Sihirbazı (PDF)</button>
+                            </div>
+                        </div>
+                        <div class="table-container-large scroll-x">
+                            <table class="report-table" id="table-yearly-report">
+                                <thead>
+                                    <tr>
+                                        <th>Müşteri / Firma</th>
+                                        <th>Sorumlu</th>
+                                        <th>Ocak</th>
+                                        <th>Şubat</th>
+                                        <th>Mart</th>
+                                        <th>Nisan</th>
+                                        <th>Mayıs</th>
+                                        <th>Haziran</th>
+                                        <th>Temmuz</th>
+                                        <th>Ağustos</th>
+                                        <th>Eylül</th>
+                                        <th>Ekim</th>
+                                        <th>Kasım</th>
+                                        <th>Aralık</th>
+                                        <th>Yıllık Toplam</th>
+                                        <th>Toplam Ciro</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-yearly-report">
+                                    <!-- Dynamic report grid -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- OVERLAYS AND MODAL WINDOWS                 -->
+    <!-- ========================================== -->
+
+    <!-- PDF Report Wizard Modal -->
+    <div id="modal-pdf-wizard" class="modal-overlay hidden">
+        <div class="modal-box glass" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>📄 Rapor Sihirbazı (PDF)</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-pdf-wizard')">×</button>
+            </div>
+            <div class="modal-body" style="padding: 15px 0;">
+                <p class="modal-intro" style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                    Raporunuzda yer almasını istediğiniz veri katmanlarını seçip indirebilirsiniz.
+                </p>
+                
+                <div class="wizard-option" style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px;">
+                    <input type="checkbox" id="chk-pdf-overview" checked style="margin-top: 4px;">
+                    <div>
+                        <label for="chk-pdf-overview" style="font-weight: 600; display: block; font-size: 14px; color: var(--text-primary);">Sayfa 1: Genel Bakış & Depo Kataloğu</label>
+                        <span style="font-size: 12px; color: var(--text-muted);">Depo özet sayıları, kritik sayaç uyarıları ve mevcut depo ürünleri.</span>
+                    </div>
+                </div>
+                
+                <div class="wizard-option" style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px;">
+                    <input type="checkbox" id="chk-pdf-handovers" checked style="margin-top: 4px;">
+                    <div>
+                        <label for="chk-pdf-handovers" style="font-weight: 600; display: block; font-size: 14px; color: var(--text-primary);">Sayfa 2: Personel Zimmet Raporu</label>
+                        <span style="font-size: 12px; color: var(--text-muted);">Personellerin elindeki zimmetli malzemelerin dökümü.</span>
+                    </div>
+                </div>
+                
+                <div class="wizard-option" style="margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px;">
+                    <input type="checkbox" id="chk-pdf-machines" checked style="margin-top: 4px;">
+                    <div>
+                        <label for="chk-pdf-machines" style="font-weight: 600; display: block; font-size: 14px; color: var(--text-primary);">Sayfa 3: Cihaz Sayaç & Performans Durumu</label>
+                        <span style="font-size: 12px; color: var(--text-muted);">Müşteri makinelerinin son sayaçları, ciro ve yıllık baskı adetleri.</span>
+                    </div>
+                </div>
+                
+                <div class="wizard-filters" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="select-pdf-employee" style="font-size: 12px; font-weight: 600;">Personel Filtresi (Zimmet İçin)</label>
+                        <select id="select-pdf-employee" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                            <option value="Tümü">Tüm Personeller</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="select-pdf-year" style="font-size: 12px; font-weight: 600;">Yıl Seçimi (Performans Analizi İçin)</label>
+                        <select id="select-pdf-year" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1);">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="closeModal('modal-pdf-wizard')">İptal</button>
+                <button id="btn-generate-pdf-wizard" class="btn btn-primary">Raporu Oluştur & İndir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="modal-edit-product" class="modal-overlay hidden">
+        <div class="modal-box glass">
+            <div class="modal-header">
+                <h2>Ürün Güncelle</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-edit-product')">×</button>
+            </div>
+            <form id="form-edit-product">
+                <input type="hidden" id="edit-prod-id">
+                <div class="form-group">
+                    <label for="edit-prod-code">Stok Kodu</label>
+                    <input type="text" id="edit-prod-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-prod-name">Ürün Adı</label>
+                    <input type="text" id="edit-prod-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-prod-supplier">Tedarikçi</label>
+                    <input type="text" id="edit-prod-supplier">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Employee Modal -->
+    <div id="modal-edit-employee" class="modal-overlay hidden">
+        <div class="modal-box glass">
+            <div class="modal-header">
+                <h2>Personel Güncelle</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-edit-employee')">×</button>
+            </div>
+            <form id="form-edit-employee">
+                <input type="hidden" id="edit-emp-id">
+                <div class="form-group">
+                    <label for="edit-emp-code">Personel Kodu</label>
+                    <input type="text" id="edit-emp-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-emp-firstname">Adı</label>
+                    <input type="text" id="edit-emp-firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-emp-lastname">Soyadı</label>
+                    <input type="text" id="edit-emp-lastname" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div id="modal-edit-customer" class="modal-overlay hidden">
+        <div class="modal-box glass">
+            <div class="modal-header">
+                <h2>Müşteri Güncelle</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-edit-customer')">×</button>
+            </div>
+            <form id="form-edit-customer">
+                <input type="hidden" id="edit-cust-id">
+                <div class="form-group">
+                    <label for="edit-cust-code">Müşteri Kodu</label>
+                    <input type="text" id="edit-cust-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cust-name">Firma / Müşteri Adı</label>
+                    <input type="text" id="edit-cust-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cust-responsible">Sorumlu Personel</label>
+                    <select id="edit-cust-responsible">
+                        <!-- Dynamic items -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cust-business">Çalışma Sistemi</label>
+                    <select id="edit-cust-business" required>
+                        <option value="KOPYA_BASI">Kopya Başı Sayaç Sistemi</option>
+                        <option value="MALZEME_KARSILIGI">Malzeme Karşılığı Sistemi</option>
+                        <option value="NORMAL">Normal Sistem</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cust-price">Birim Sayfa Ücreti (Kopya Başı)</label>
+                    <input type="number" id="edit-cust-price" min="0" step="0.0001" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Machine Edit Modal -->
+    <div id="modal-edit-machine" class="modal-overlay hidden">
+        <div class="modal-box glass">
+            <div class="modal-header">
+                <h2>Cihaz Güncelle</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-edit-machine')">×</button>
+            </div>
+            <form id="form-edit-machine">
+                <input type="hidden" id="edit-mach-id">
+                <div class="form-group">
+                    <label for="edit-mach-cust">Müşteri / Firma</label>
+                    <select id="edit-mach-cust" required>
+                        <!-- Dynamic items -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-name">Cihaz Modeli / Adı</label>
+                    <input type="text" id="edit-mach-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-serial">Seri Numarası</label>
+                    <input type="text" id="edit-mach-serial" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-initial-meter">Başlangıç Sayacı</label>
+                    <input type="number" id="edit-mach-initial-meter" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-current-meter">Güncel Sayaç</label>
+                    <input type="number" id="edit-mach-current-meter" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-initial-date">Sayaç Kayıt Tarihi</label>
+                    <input type="date" id="edit-mach-initial-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-install-date">Kurulum Tarihi</label>
+                    <input type="date" id="edit-mach-install-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-mach-ownership">Mülkiyet Tipi</label>
+                    <select id="edit-mach-ownership" required>
+                        <option value="BİZİM_MAKİNEMİZ">Bizim Makinemiz</option>
+                        <option value="MÜŞTERİNİN_MAKİNESİ">Müşterinin Makinesi</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toner Type Edit Modal -->
+    <div id="modal-edit-toner-type" class="modal-overlay hidden">
+        <div class="modal-box glass">
+            <div class="modal-header">
+                <h2>Toner Türü Güncelle</h2>
+                <button class="btn-close-modal" onclick="closeModal('modal-edit-toner-type')">×</button>
+            </div>
+            <form id="form-edit-toner-type">
+                <input type="hidden" id="edit-toner-id">
+                <div class="form-group">
+                    <label for="edit-toner-name">Toner Adı</label>
+                    <input type="text" id="edit-toner-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-toner-cost-kg">1 KG Alış Fiyatı (TL)</label>
+                    <input type="number" id="edit-toner-cost-kg" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-toner-capacity">Kapasite (1 KG / Sayfa)</label>
+                    <input type="number" id="edit-toner-capacity" min="1000" step="1000" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Değişiklikleri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MÜŞTERİ DETAY KARTI (CUSTOMER DETAIL DIALOG OVERLAY) -->
+    <div id="modal-customer-detail" class="modal-overlay hidden">
+        <div class="modal-box-large glass">
+            <div class="modal-header">
+                <div class="detail-title-block">
+                    <h2 id="detail-customer-name">Müşteri Adı Bilgisi</h2>
+                    <span id="detail-customer-code" class="code-tag">Müşteri Kodu</span>
+                </div>
+                <button class="btn-close-modal" onclick="closeModal('modal-customer-detail')">×</button>
+            </div>
+            
+            <div class="modal-content-scroll">
+                <!-- Financial Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card glass compact-card">
+                        <div class="stat-info-compact">
+                            <h4>Toplam Çekim (Kopya)</h4>
+                            <p id="detail-stat-copies">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass compact-card">
+                        <div class="stat-info-compact">
+                            <h4>Toplam Ciro</h4>
+                            <p id="detail-stat-revenue">0.00 TL</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass compact-card">
+                        <div class="stat-info-compact">
+                            <h4>Giderler (Toner+Servis)</h4>
+                            <p id="detail-stat-expenses">0.00 TL</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass compact-card" id="detail-profit-card">
+                        <div class="stat-info-compact">
+                            <h4>Net Kâr / Zarar</h4>
+                            <p id="detail-stat-profit">0.00 TL</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialog Tabs navigation -->
+                <div class="tab-menu-horizontal">
+                    <button class="btn-sub-tab active" data-subtab="subtab-delivery-history">Teslimat Geçmişi</button>
+                    <button class="btn-sub-tab" id="subtab-meter-btn" data-subtab="subtab-meter-tracking">Kopya Sayaç Takibi</button>
+                    <button class="btn-sub-tab" data-subtab="subtab-toner-delivery">Toner Teslimatı</button>
+                    <button class="btn-sub-tab" data-subtab="subtab-services">Servis Giderleri</button>
+                    <button class="btn-sub-tab" data-subtab="subtab-material-dispatches">Malzeme Çıkışı</button>
+                </div>
+
+                <div class="sub-tab-content">
+                    <!-- SUBTAB: Teslimat Geçmişi -->
+                    <div id="subtab-delivery-history" class="sub-tab-pane active">
+                        <div class="table-container">
+                            <table id="table-detail-history">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>İşlem Türü</th>
+                                        <th>Teslim Eden</th>
+                                        <th>Ürün Kodu</th>
+                                        <th>Ürün Adı</th>
+                                        <th>Miktar</th>
+                                        <th>Açıklama</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-detail-history">
+                                    <!-- Dynamic history rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB: Kopya Sayaç Takibi -->
+                    <div id="subtab-meter-tracking" class="sub-tab-pane">
+                        <div class="grid-2-1">
+                            <div class="card glass compact">
+                                <div class="card-header">
+                                    <h3>Sayaç Okumaları Kayıtları</h3>
+                                </div>
+                                <div class="table-container">
+                                    <table id="table-detail-readings">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Sayaç Değeri</th>
+                                                <th>Önceki Değer</th>
+                                                <th>Fark (Kopya)</th>
+                                                <th>Birim Fiyat</th>
+                                                <th>Tutar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-detail-readings">
+                                            <!-- Dynamic readings -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="side-forms">
+                                <div class="card glass compact">
+                                    <div class="card-header">
+                                        <h3>Yeni Sayaç Girişi</h3>
+                                    </div>
+                                    <div class="info-strip text-xs" id="detail-meter-info">
+                                        Model: - | Güncel Sayaç: -
+                                    </div>
+                                    <form id="form-detail-add-meter">
+                                        <div class="form-group">
+                                            <label for="detail-meter-machine">Makine / Cihaz Seçin</label>
+                                            <select id="detail-meter-machine" required>
+                                                <!-- Dynamic customer machines -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-meter-val">Güncel Sayaç Değeri</label>
+                                            <input type="number" id="detail-meter-val" min="0" required placeholder="Sayaç değerini girin">
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-block">Sayaç Kaydet</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB: Toner Teslimatı & Ömür Takibi -->
+                    <div id="subtab-toner-delivery" class="sub-tab-pane">
+                        <div class="grid-2-1">
+                            <div class="card glass compact">
+                                <div class="card-header">
+                                    <h3>Toner Teslim Geçmişi & Ömür Takibi</h3>
+                                </div>
+                                <div class="table-container">
+                                    <table id="table-detail-toner">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Toner Türü</th>
+                                                <th>Miktar (gr)</th>
+                                                <th>Tahmini Baskı</th>
+                                                <th>Gerçek Çekim</th>
+                                                <th>Kalan Baskı</th>
+                                                <th>Maliyet</th>
+                                                <th>Durum</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-detail-toner">
+                                            <!-- Dynamic toner history -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="side-forms">
+                                <div class="card glass compact">
+                                    <div class="card-header">
+                                        <h3>Toner Teslimat Kaydı</h3>
+                                    </div>
+                                    <form id="form-detail-add-toner">
+                                        <div class="form-group">
+                                            <label for="detail-toner-type">Toner Türü</label>
+                                            <select id="detail-toner-type" required>
+                                                <!-- Dynamic toner types -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-toner-grams">Gramaj (gr)</label>
+                                            <input type="number" id="detail-toner-grams" min="50" step="50" value="450" required>
+                                        </div>
+                                        <div class="form-group text-xs info-strip" id="detail-toner-calc-info">
+                                            Tahmini Kapasite: 9,000 sayfa | Maliyet: 0.00 TL
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-toner-notes">Notlar</label>
+                                            <input type="text" id="detail-toner-notes" placeholder="Toner seri no veya detay notlar">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block">Toner Teslim Et</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB: Servis Giderleri -->
+                    <div id="subtab-services" class="sub-tab-pane">
+                        <div class="grid-2-1">
+                            <div class="card glass compact">
+                                <div class="card-header">
+                                    <h3>Servis / Bakım Gider Kayıtları</h3>
+                                </div>
+                                <div class="table-container">
+                                    <table id="table-detail-services">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Açıklama</th>
+                                                <th>Tutar (TL)</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-detail-services">
+                                            <!-- Dynamic services list -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="side-forms">
+                                <div class="card glass compact">
+                                    <div class="card-header">
+                                        <h3>Servis Gider Kaydı</h3>
+                                    </div>
+                                    <form id="form-detail-add-service">
+                                        <div class="form-group">
+                                            <label for="detail-service-desc">Açıklama</label>
+                                            <input type="text" id="detail-service-desc" required placeholder="Örn: Merdane değişimi işçilik">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-service-amount">Tutar (TL)</label>
+                                            <input type="number" id="detail-service-amount" min="1" step="0.5" value="100" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block">Gider Ekle</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBTAB: Malzeme Çıkışı -->
+                    <div id="subtab-material-dispatches" class="sub-tab-pane">
+                        <div class="grid-2-1">
+                            <div class="card glass compact">
+                                <div class="card-header">
+                                    <h3>Malzeme / Parça Çıkış Kayıtları</h3>
+                                </div>
+                                <div class="table-container">
+                                    <table id="table-detail-dispatches">
+                                        <thead>
+                                            <tr>
+                                                <th>Tarih</th>
+                                                <th>Cihaz</th>
+                                                <th>Malzeme</th>
+                                                <th>Miktar</th>
+                                                <th>Açıklama</th>
+                                                <th>Fatura (Normal)</th>
+                                                <th>Maliyet (Şirket)</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-detail-dispatches">
+                                            <!-- Dynamic dispatches -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="side-forms">
+                                <div class="card glass compact">
+                                    <div class="card-header">
+                                        <h3>Malzeme / Parça Çıkışı Ekle</h3>
+                                    </div>
+                                    <form id="form-detail-add-dispatch">
+                                        <div class="form-group">
+                                            <label for="detail-dispatch-machine">Makine / Cihaz Seçin</label>
+                                            <select id="detail-dispatch-machine" required>
+                                                <!-- Dynamic customer machines -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Malzeme Kaynağı</label>
+                                            <div class="radio-group">
+                                                <label><input type="radio" name="dispatch-source" value="warehouse" checked> Depodan Çıkış</label>
+                                                <label><input type="radio" name="dispatch-source" value="employee"> Zimmetten Çıkış</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group hidden" id="detail-dispatch-emp-group">
+                                            <label for="detail-dispatch-emp">Zimmetli Personel</label>
+                                            <select id="detail-dispatch-emp">
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-dispatch-prod">Ürün</label>
+                                            <select id="detail-dispatch-prod" required>
+                                                <option value="">Seçiniz...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-dispatch-qty">Miktar</label>
+                                            <input type="number" id="detail-dispatch-qty" min="1" value="1" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-dispatch-desc">Açıklama / Parça Adı</label>
+                                            <input type="text" id="detail-dispatch-desc" placeholder="Örn: Drum ünitesi değişimi">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="detail-dispatch-cost">Birim Maliyet / Fiyat (TL)</label>
+                                            <input type="number" id="detail-dispatch-cost" min="0" value="0.00" step="0.01">
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-success btn-block">Parça Çıkışı Kaydet</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-customer-detail')">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Entry -->
+    <script src="app.js"></script>
+</body>
+</html>
