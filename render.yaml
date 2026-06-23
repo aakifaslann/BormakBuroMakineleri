@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: bormak-stok-takip
+    env: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+        placeholder: "Supabase PostgreSQL Bağlantı Adresi (postgresql://...)"
